@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG Quest - 關卡 4: 乾淨水與衛生 (選擇題)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ==================================== */
+        /* 通用與基本樣式             */
+        /* ==================================== */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-color: #00BCD4; /* SDG 6 的藍色調 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 確保像素字體在縮放時保持銳利 */
+        h1, h2, span, button, a, p {
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* ==================================== */
+        /* 關卡畫面專屬的背景元素             */
+        /* ==================================== */
+        .quiz-background-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-image: url('img/equality_bg.png'); /* 統一使用此背景圖 */
+            background-size: cover;
+            background-position: center;
+            image-rendering: pixelated;
+            z-index: 1;
+            opacity: 0.8; /* 稍微透明，讓題目更清晰 */
+        }
+
+        /* ==================================== */
+        /* 遊戲介面頂部資訊             */
+        /* ==================================== */
+        .header-bar {
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #0097A7; /* 與SDG 6顏色接近 */
+            border: 4px solid #006064;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 #000;
+            z-index: 20;
+        }
+
+        .header-bar img.sdg-icon {
+            width: 50px;
+            height: 50px;
+            image-rendering: pixelated;
+            margin-right: 15px;
+        }
+
+        .header-bar .level-info {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .header-bar .level-title {
+            margin-left: 10px;
+            color: #fff;
+            image-rendering: pixelated;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .header-bar .score-info {
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+            color: #FFEB3B;
+        }
+
+        /* ==================================== */
+        /* 遊戲區域 - 問答題介面 (調整為 16:9)  */
+        /* ==================================== */
+        .game-area {
+            width: 90%;
+            max-width: 960px; /* 16:9 比例的合適寬度，例如 960px x 540px */
+            aspect-ratio: 16 / 9; /* 設定為 16:9 比例 */
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 8px solid #006064; /* 與SDG 6邊框色 */
+            box-shadow: 10px 10px 0 #00363A;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #333;
+            text-shadow: none;
+        }
+
+        /* 響應式調整，確保在不同螢幕尺寸下保持比例 */
+        @media (max-width: 1000px) {
+            .game-area {
+                max-height: 80vh;
+                width: auto;
+                height: auto;
+            }
+        }
+        @media (max-height: 600px) {
+            .game-area {
+                max-width: 90vw;
+                width: auto;
+                height: auto;
+            }
+        }
+
+        .question-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+            line-height: 1.5;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            width: 80%;
+        }
+
+        .option-button {
+            background-color: #4DD0E1;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border: 4px solid #00BCD4;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 4px 4px 0 #00838F;
+            text-shadow: 1px 1px 0 #000;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            text-align: left;
+            word-break: break-word;
+            white-space: normal;
+            line-height: 1.3;
+        }
+
+        .option-button:hover {
+            background-color: #80DEEA;
+            box-shadow: 2px 2px 0 #0097A7;
+        }
+
+        .option-button.correct {
+            background-color: #4CAF50;
+            border-color: #388E3C;
+            box-shadow: 4px 4px 0 #1B5E20;
+        }
+
+        .option-button.wrong {
+            background-color: #F44336;
+            border-color: #D32F2F;
+            box-shadow: 4px 4px 0 #B71C1C;
+        }
+
+        .feedback-icon {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            image-rendering: pixelated;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeInOut 1s forwards;
+            z-index: 25;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        /* ==================================== */
+        /* 遊戲結果畫面             */
+        /* ==================================== */
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            display: none;
+        }
+
+        .overlay-content {
+            background-color: #0097A7; /* 與SDG 6顏色接近 */
+            padding: 30px 50px;
+            border: 8px solid #006064;
+            box-shadow: 10px 10px 0 #00363A;
+            border-radius: 15px;
+            text-align: center;
+            animation: bounceIn 0.8s ease-out;
+            max-width: 90%;
+            box-sizing: border-box;
+        }
+
+        .overlay-content h3 {
+            font-size: 2.5em;
+            color: #BBDEFB;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #1565C0;
+        }
+
+        .overlay-content p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.5);
+            letter-spacing: 0.03em;
+        }
+
+        .overlay-content img.icon {
+            width: 80px;
+            height: 80px;
+            image-rendering: pixelated;
+            margin-bottom: 20px;
+        }
+
+        .overlay-content .next-level-button {
+            background-color: #FF5722;
+            color: white;
+            padding: 15px 30px;
+            border: 4px solid #D32F2F;
+            cursor: pointer;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 5px 5px 0 #A13C00;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .overlay-content .next-level-button:hover {
+            background-color: #E64A19;
+            box-shadow: 3px 3px 0 #7D2700;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="quiz-background-layer"></div>
+
+    <div class="header-bar">
+        <div class="level-info">
+            <img src="img/sdg6_icon.png" alt="SDG 6 乾淨水與衛生" class="sdg-icon">
+            <span class="level-title">關卡 4: 乾淨水與衛生</span>
+        </div>
+        <div class="score-info">
+            <span id="score">答對: 0</span> / <span id="max-score">0</span>
+        </div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+        <div class="question-container">
+            <p class="question-text" id="questionText">問題載入中...</p>
+        </div>
+        <div class="options-container" id="optionsContainer">
+            </div>
+    </div>
+
+    <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-content">
+            <img src="img/checkmark.png" alt="關卡完成" class="icon">
+            <h3 id="overlayTitle">關卡完成！</h3>
+            <p id="overlayMessage">你對乾淨水與衛生有深入理解！繼續為永續發展努力！</p>
+            <a href="level5.html" class="next-level-button">下一關</a>
+        </div>
+    </div>
+
+    <audio id="gameMusic" loop>
+        <source src="img/12345.mp3" type="audio/mpeg">
+        您的瀏覽器不支援音訊元素。
+    </audio>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const scoreDisplay = document.getElementById('score');
+        const maxScoreDisplay = document.getElementById('max-score');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const gameMusic = document.getElementById('gameMusic');
+
+        let correctAnswersCount = 0;
+        const totalQuestionsRequired = 5; // 這關要答對的題目數量 (總共 5 題，全部答對才算通關)
+        let currentQuestionIndex = 0; // 當前問題的索引
+
+        // 問答題資料 for SDG 6: 乾淨水與衛生 (共 8 題，會隨機選 5 題)
+        const questions = [
+            {
+                question: "什麼是水資源管理的核心目標？",
+                options: [
+                    "A. 僅供農業灌溉",
+                    "B. 確保所有人都可持續獲得安全飲用水和衛生設施",
+                    "C. 將水資源全部用於工業生產",
+                    "D. 鼓勵無限制地使用水資源"
+                ],
+                correctAnswer: "B. 確保所有人都可持續獲得安全飲用水和衛生設施"
+            },
+            {
+                question: "全球有多少人無法獲得安全飲用水？",
+                options: [
+                    "A. 數百萬",
+                    "B. 數十億",
+                    "C. 數千人",
+                    "D. 幾乎沒有人"
+                ],
+                correctAnswer: "B. 數十億" // 根據聯合國數據，約22億人無法獲得安全飲用水
+            },
+            {
+                question: "改善衛生設施對社會有什麼好處？",
+                options: [
+                    "A. 增加疾病傳播",
+                    "B. 減少疾病傳播，改善公共健康，提升生活品質",
+                    "C. 耗費大量資源且無實質效益",
+                    "D. 僅對少數人有利"
+                ],
+                correctAnswer: "B. 減少疾病傳播，改善公共健康，提升生活品質"
+            },
+            {
+                question: "以下哪項是減少水污染的有效方法？",
+                options: [
+                    "A. 直接將工業廢水排入河流",
+                    "B. 實施廢水處理、減少農藥化肥使用、推廣節約用水",
+                    "C. 將垃圾丟入湖泊",
+                    "D. 鼓勵浪費水資源"
+                ],
+                correctAnswer: "B. 實施廢水處理、減少農藥化肥使用、推廣節約用水"
+            },
+            {
+                question: "氣候變遷如何影響水資源？",
+                options: [
+                    "A. 使水資源分佈更平均",
+                    "B. 導致乾旱和洪災頻繁，影響水循環，加劇水資源短缺",
+                    "C. 對水資源沒有影響",
+                    "D. 增加淡水供應"
+                ],
+                correctAnswer: "B. 導致乾旱和洪災頻繁，影響水循環，加劇水資源短缺"
+            },
+            {
+                question: "推廣洗手習慣對於改善公共衛生有何作用？",
+                options: [
+                    "A. 僅能清潔雙手外表",
+                    "B. 有效預防疾病傳播，特別是腸道疾病和呼吸道感染",
+                    "C. 對疾病預防沒有實質幫助",
+                    "D. 僅適用於特定人群"
+                ],
+                correctAnswer: "B. 有效預防疾病傳播，特別是腸道疾病和呼吸道感染"
+            },
+            {
+                question: "什麼是「綜合水資源管理」（Integrated Water Resources Management, IWRM）？",
+                options: [
+                    "A. 僅關注單一水域的開發",
+                    "B. 以整體性、跨部門的方式管理水資源，考量環境、社會和經濟因素",
+                    "C. 只管理飲用水，不包括其他用水",
+                    "D. 鼓勵無節制地抽取地下水"
+                ],
+                correctAnswer: "B. 以整體性、跨部門的方式管理水資源，考量環境、社會和經濟因素"
+            },
+            {
+                question: "為何在開發中國家提供安全飲用水和衛生設施特別重要？",
+                options: [
+                    "A. 僅為國際形象",
+                    "B. 是改善貧困、健康、教育和性別平等的基礎",
+                    "C. 與當地居民生活無關",
+                    "D. 會導致過度開發"
+                ],
+                correctAnswer: "B. 是改善貧困、健康、教育和性別平等的基礎"
+            }
+        ];
+
+        let shuffledQuestions = []; // 儲存隨機排序後的問題
+        let currentQuestionData = {}; // 儲存當前顯示的問題數據
+
+        // 初始化遊戲
+        function initGame() {
+            correctAnswersCount = 0;
+            currentQuestionIndex = 0;
+            scoreDisplay.textContent = `答對: ${correctAnswersCount}`;
+            maxScoreDisplay.textContent = totalQuestionsRequired;
+            gameOverlay.style.display = 'none';
+
+            // 隨機打亂題目順序並選取指定數量
+            shuffledQuestions = shuffleArray(questions).slice(0, totalQuestionsRequired);
+            
+            // 播放音樂
+            playMusic();
+            
+            // 顯示第一道題目
+            displayQuestion();
+        }
+
+        // 播放音樂
+        function playMusic() {
+            gameMusic.volume = 0.4; // 設定音量，例如 40%
+            const playPromise = gameMusic.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // 音樂已成功自動播放
+                }).catch(error => {
+                    // 自動播放被阻止，通常會在這裡處理用戶互動後播放
+                    console.log("Music autoplay prevented:", error);
+                    document.addEventListener('click', function userInteractionPlay() {
+                        gameMusic.play();
+                        document.removeEventListener('click', userInteractionPlay);
+                    }, { once: true });
+                });
+            }
+        }
+
+        // 隨機打亂陣列
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // ES6 陣列解構賦值交換
+            }
+            return array;
+        }
+
+        // 顯示問題和選項
+        function displayQuestion() {
+            if (currentQuestionIndex >= totalQuestionsRequired) {
+                endLevel(); // 所有題目答完，進入通關
+                return;
+            }
+
+            currentQuestionData = shuffledQuestions[currentQuestionIndex];
+            questionText.textContent = currentQuestionData.question;
+            optionsContainer.innerHTML = ''; // 清空舊選項
+
+            // 重新啟用按鈕
+            optionsContainer.style.pointerEvents = 'auto'; 
+
+            currentQuestionData.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = option;
+                button.addEventListener('click', () => checkAnswer(button, option, currentQuestionData.correctAnswer));
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        // 檢查答案
+        function checkAnswer(selectedButton, selectedOption, correctAnswer) {
+            // 禁用所有選項，防止重複點擊
+            optionsContainer.style.pointerEvents = 'none'; 
+
+            // 顯示正確答案的高亮
+            Array.from(optionsContainer.children).forEach(button => {
+                if (button.textContent === correctAnswer) {
+                    button.classList.add('correct');
+                }
+            });
+
+            if (selectedOption === correctAnswer) {
+                selectedButton.classList.add('correct'); // 選中的按鈕也高亮正確
+                correctAnswersCount++;
+                scoreDisplay.textContent = `答對: ${correctAnswersCount}`;
+                showFeedbackIcon('img/correct_icon.png');
+
+                // 延遲後進入下一題
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    displayQuestion();
+                }, 1500); // 1.5 秒後顯示下一題
+            } else {
+                selectedButton.classList.add('wrong'); // 選中的按鈕高亮錯誤
+                showFeedbackIcon('img/wrong_icon.png');
+                
+                gameMusic.pause(); // 暫停音樂
+                gameMusic.currentTime = 0; // 音樂回到開頭
+                
+                // 延遲一小段時間讓錯誤提示圖示顯示，然後自動重新載入當前關卡
+                setTimeout(() => {
+                    window.location.reload(); // **直接重新載入當前頁面 (重新開始當前關卡)**
+                }, 1000); // 1 秒後自動重新載入
+            }
+        }
+
+        // 顯示答對/答錯圖示
+        function showFeedbackIcon(iconSrc) {
+            const feedbackIcon = document.createElement('img');
+            feedbackIcon.src = iconSrc;
+            feedbackIcon.classList.add('feedback-icon');
+            gameArea.appendChild(feedbackIcon);
+
+            // 移除圖示
+            setTimeout(() => {
+                feedbackIcon.remove();
+            }, 1000); // 與動畫時間匹配
+        }
+
+        // 關卡成功結束
+        function endLevel() {
+            gameMusic.pause(); // 暫停音樂
+            gameMusic.currentTime = 0; // 音樂回到開頭
+            
+            // 清空 overlay content
+            const overlayContent = gameOverlay.querySelector('.overlay-content');
+            overlayContent.innerHTML = ''; 
+
+            // 添加通關訊息
+            const checkmarkIcon = document.createElement('img');
+            checkmarkIcon.src = 'img/checkmark.png';
+            checkmarkIcon.alt = '關卡完成';
+            checkmarkIcon.classList.add('icon');
+            overlayContent.appendChild(checkmarkIcon);
+
+            const title = document.createElement('h3');
+            title.textContent = '關卡完成！';
+            overlayContent.appendChild(title);
+
+            const message = document.createElement('p');
+            message.textContent = '你對乾淨水與衛生有深入理解！繼續為永續發展努力！';
+            overlayContent.appendChild(message);
+
+            // 添加下一關按鈕
+            const nextButton = document.createElement('a');
+            nextButton.href = 'level5.html'; // 通關後到 level5.html
+            nextButton.classList.add('next-level-button');
+            nextButton.textContent = '下一關';
+            overlayContent.appendChild(nextButton);
+
+            gameOverlay.style.display = 'flex'; // 顯示通關畫面
+        }
+
+        // 頁面載入時初始化遊戲
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>
