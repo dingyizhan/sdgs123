@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG Quest - Level 1: Clean Water</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ==================================== */
+        /* 通用與基本樣式             */
+        /* ==================================== */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-color: #87CEEB; /* 天空藍 */
+            display: flex;
+            flex-direction: column; /* 垂直排列 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 確保像素字體在縮放時保持銳利 */
+        h1, h2, span, button, a {
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* ==================================== */
+        /* 關卡畫面 - 背景優化 (天空部分)       */
+        /* ==================================== */
+        .sky-background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%; /* 覆蓋整個body */
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden; /* 防止內容溢出 */
+            z-index: 1; /* 位於遊戲區塊之下 */
+        }
+
+        /* 遠景山脈 */
+        .mountain-layer {
+            position: absolute;
+            width: 100%;
+            height: 40%;
+            bottom: 0; /* 從底部開始 */
+            left: 0;
+            background-color: #6C5E7A; /* 深紫色/灰色，遠山色 */
+            z-index: 2; /* 比雲和魚高 */
+            clip-path: polygon(0 100%, 0 70%, 10% 80%, 20% 65%, 30% 75%, 40% 60%, 50% 70%, 60% 55%, 70% 65%, 80% 50%, 90% 60%, 100% 45%, 100% 100%);
+            transform: translateY(20%); /* 確保顯示在底部 */
+        }
+        .mountain-layer.closer { /* 增加一層近一點的山 */
+            background-color: #558B2F; /* 深綠色，更近的山色 */
+            height: 30%;
+            bottom: 0;
+            z-index: 3;
+            clip-path: polygon(0 100%, 0 80%, 15% 70%, 30% 85%, 45% 70%, 60% 80%, 75% 65%, 90% 75%, 100% 60%, 100% 100%);
+            transform: translateY(10%);
+        }
+
+
+        .pixel-cloud {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 5px 5px 0 rgba(200, 200, 200, 0.5); /* 像素陰影 */
+            animation: moveCloud 20s linear infinite;
+        }
+
+        .pixel-cloud:nth-child(1) { top: 5%; left: -10%; animation-delay: 0s; }
+        .pixel-cloud:nth-child(2) { top: 15%; left: -30%; animation-delay: 5s; width: 120px; height: 50px;}
+        .pixel-cloud:nth-child(3) { top: 10%; left: -50%; animation-delay: 10s; width: 80px; height: 30px;}
+        .pixel-cloud:nth-child(4) { top: 25%; left: -70%; animation-delay: 15s; width: 90px; height: 35px;} /* 更多雲 */
+        .pixel-cloud:nth-child(5) { top: 20%; left: -90%; animation-delay: 20s; width: 110px; height: 45px;}
+
+        @keyframes moveCloud {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(120vw); }
+        }
+
+        /* 水中生物 (像素魚) - 依然在遊戲區域的範圍內 */
+        .pixel-fish {
+            position: absolute;
+            width: 20px;
+            height: 10px;
+            background-color: #00BCD4; /* 藍色小魚 */
+            border-radius: 5px;
+            transform: scaleX(-1); /* 預設往左游 */
+            animation: swim 8s linear infinite;
+            bottom: 50px; /* 在河底附近 */
+            opacity: 0.7;
+            z-index: 12; /* 在遊戲水層之上，污染源之下 */
+            pointer-events: none; /* 不影響點擊 */
+        }
+        .pixel-fish:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .pixel-fish:nth-child(2) { left: 30%; animation-delay: 3s; transform: scaleX(1); /* 往右游 */ }
+        .pixel-fish:nth-child(3) { left: 50%; animation-delay: 6s; }
+        .pixel-fish:nth-child(4) { left: 70%; animation-delay: 9s; transform: scaleX(1); }
+
+
+        /* ==================================== */
+        /* 遊戲介面頂部資訊             */
+        /* ==================================== */
+        .header-bar {
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #33691E;
+            border: 4px solid #1B5E20;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 #000;
+            z-index: 20;
+        }
+
+        .header-bar img.sdg-icon {
+            width: 50px;
+            height: 50px;
+            image-rendering: pixelated;
+            margin-right: 15px;
+        }
+
+        .header-bar .level-info {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        /* 英文關卡標題 */
+        .level-info .level-title {
+            margin-left: 10px; /* 稍微分開SDG圖示 */
+            color: #fff; /* 確保文字顏色 */
+            /* 保持 Press Start 2P 風格，並應用像素化渲染 */
+            image-rendering: pixelated;
+            text-shadow: 2px 2px 0 #000; /* 簡單的像素陰影 */
+        }
+
+
+        .header-bar .score-info {
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+            color: #FFEB3B;
+        }
+
+        /* ==================================== */
+        /* 遊戲區域             */
+        /* ==================================== */
+        .game-area {
+            width: 90%;
+            max-width: 800px;
+            height: 500px;
+            border: 8px solid #33691E;
+            box-shadow: 10px 10px 0 #1B5E20;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            background-color: #4DD0E1; /* 基礎水色 */
+        }
+
+        /* 污染水和乾淨水的背景現在作為內部層 */
+        .game-area .water-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            image-rendering: pixelated;
+            transition: opacity 1s ease-in-out; /* 切換背景時的動畫 */
+        }
+        .game-area .water-layer.polluted {
+            background-image: url('img/water_polluted.png');
+        }
+        .game-area .water-layer.clean {
+            background-image: url('img/water_clean.png');
+            opacity: 0; /* 預設不可見 */
+        }
+
+
+        /* 遊戲內污染源的樣式 */
+        .pollution-item {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: transform 0.1s ease-out, opacity 0.3s ease-out;
+            z-index: 15;
+            animation: float 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .pollution-item.removed {
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        /* 點擊特效 */
+        .sparkle-effect {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-image: url('img/sparkle.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            pointer-events: none;
+            animation: sparkleAndFade 0.6s forwards;
+            z-index: 20;
+        }
+
+        @keyframes sparkleAndFade {
+            0% { opacity: 1; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+            100% { opacity: 0; transform: scale(0) rotate(360deg); }
+        }
+
+        /* 背景水面動畫 (優化點) */
+        .water-surface-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* 覆蓋整個遊戲區域 */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="0" y="0" width="10" height="10" fill="%2300BCD4"/><rect x="0" y="0" width="5" height="5" fill="%230097A7"/><rect x="5" y="5" width="5" height="5" fill="%230097A7"/></svg>'); /* 簡單的像素波紋 */
+            background-size: 20px 20px; /* 波紋大小 */
+            animation: waterFlow 15s linear infinite;
+            opacity: 0.2; /* 半透明效果 */
+            z-index: 12; /* 在污染源之下，水層之上 */
+            pointer-events: none;
+        }
+
+        @keyframes waterFlow {
+            0% { background-position: 0 0; }
+            100% { background-position: 200px 200px; } /* 讓波紋移動 */
+        }
+
+
+        /* ==================================== */
+        /* 遊戲結果畫面             */
+        /* ==================================== */
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            display: none;
+        }
+
+        .overlay-content {
+            background-color: #4CAF50;
+            padding: 30px 50px;
+            border: 8px solid #33691E;
+            box-shadow: 10px 10px 0 #1B5E20;
+            border-radius: 15px;
+            text-align: center;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .overlay-content h3 {
+            font-size: 2.5em;
+            color: #FFEB3B;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #DAA520;
+        }
+
+        .overlay-content p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.5);
+            letter-spacing: 0.03em;
+        }
+
+        .overlay-content img.icon {
+            width: 80px;
+            height: 80px;
+            image-rendering: pixelated;
+            margin-bottom: 20px;
+        }
+
+        .overlay-content .next-level-button {
+            background-color: #FF5722;
+            color: white;
+            padding: 15px 30px;
+            border: 4px solid #D32F2F;
+            cursor: pointer;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 5px 5px 0 #A13C00;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .overlay-content .next-level-button:hover {
+            background-color: #E64A19;
+            box-shadow: 3px 3px 0 #7D2700;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sky-background-elements">
+        <div class="mountain-layer"></div>
+        <div class="mountain-layer closer"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+    </div>
+
+
+    <div class="header-bar">
+        <div class="level-info">
+            <img src="img/sdg6_icon.png" alt="SDG 6 Clean Water" class="sdg-icon">
+            <span class="level-title">Level 1: Clean Water</span>
+        </div>
+        <div class="score-info">
+            <span id="score">Score: 0</span> / <span id="max-score">0</span>
+        </div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+        <div class="water-layer polluted"></div>
+        <div class="water-layer clean"></div>
+        <div class="water-surface-animation"></div>
+        <div class="pixel-fish"></div>
+        <div class="pixel-fish"></div>
+        <div class="pixel-fish"></div>
+        <div class="pixel-fish"></div>
+        </div>
+
+    <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-content">
+            <img src="img/checkmark.png" alt="Level Complete" class="icon">
+            <h3 id="overlayTitle">Level Complete!</h3>
+            <p id="overlayMessage">The Earth thanks your efforts! The water is now clean!</p>
+            <a href="level2.html" class="next-level-button">Next Level</a>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const pollutedWaterLayer = gameArea.querySelector('.water-layer.polluted');
+        const cleanWaterLayer = gameArea.querySelector('.water-layer.clean');
+        const scoreDisplay = document.getElementById('score');
+        const maxScoreDisplay = document.getElementById('max-score');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+        const overlayIcon = gameOverlay.querySelector('.icon');
+        const nextLevelButton = gameOverlay.querySelector('.next-level-button');
+
+        let score = 0;
+        let pollutionCount = 0;
+        const totalPollution = 10; // 這關要淨化的污染源總數
+
+        // 污染源的圖片路徑
+        const pollutionImages = [
+            'img/plastic_bottle.png',
+            'img/trash_bag.png',
+            'img/oil_spill.png'
+        ];
+
+        // 初始化遊戲
+        function initGame() {
+            // 重置背景狀態
+            pollutedWaterLayer.style.opacity = 1;
+            cleanWaterLayer.style.opacity = 0;
+
+            // 清除現有的污染源，並重新添加其他元素
+            const elementsToRemove = gameArea.querySelectorAll('.pollution-item');
+            elementsToRemove.forEach(el => el.remove());
+
+            // 因為 innerHTML = '' 會清掉所有子元素，所以要確保背景層和動畫層以及魚重新被添加
+            // 由於水層和動畫層是 gameArea 的直接子元素，應該在 initGame 外面定義好，避免重複添加
+            // 或者，在 initGame 內部每次都重新 appendChild
+            // 為了簡潔，這裡假設這些層次在 HTML 載入時就已經存在於 DOM 中，只改變它們的狀態
+
+            score = 0;
+            pollutionCount = 0;
+            scoreDisplay.textContent = `Score: ${score}`;
+            maxScoreDisplay.textContent = totalPollution;
+            gameOverlay.style.display = 'none'; // 隱藏結果畫面
+
+            // 隨機生成污染源
+            for (let i = 0; i < totalPollution; i++) {
+                createPollutionItem();
+            }
+        }
+
+        // 創建一個污染源
+        function createPollutionItem() {
+            const pollutionItem = document.createElement('div');
+            pollutionItem.classList.add('pollution-item');
+
+            // 隨機選擇污染源圖片
+            const randomImage = pollutionImages[Math.floor(Math.random() * pollutionImages.length)];
+            pollutionItem.style.backgroundImage = `url('${randomImage}')`;
+
+            // 隨機位置 (考慮不要太靠近邊緣)
+            const maxX = gameArea.offsetWidth - 60; // 減去污染源寬度
+            const maxY = gameArea.offsetHeight - 60; // 減去污染源高度
+            pollutionItem.style.left = `${Math.random() * maxX}px`;
+            pollutionItem.style.top = `${Math.random() * maxY}px`;
+
+            pollutionItem.addEventListener('click', () => {
+                removePollution(pollutionItem);
+            });
+
+            gameArea.appendChild(pollutionItem);
+            pollutionCount++;
+        }
+
+        // 移除污染源
+        function removePollution(item) {
+            if (item.classList.contains('removed')) return; // 防止重複點擊
+
+            item.classList.add('removed');
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+
+            // 添加淨化特效
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle-effect');
+            sparkle.style.left = `${item.offsetLeft + item.offsetWidth / 2 - sparkle.offsetWidth / 2}px`;
+            sparkle.style.top = `${item.offsetTop + item.offsetHeight / 2 - sparkle.offsetHeight / 2}px`;
+            gameArea.appendChild(sparkle);
+            setTimeout(() => {
+                sparkle.remove();
+            }, 600);
+
+            // 當所有污染源都被移除時，關卡完成
+            if (score >= totalPollution) {
+                setTimeout(endLevel, 700);
+            }
+        }
+
+        // 關卡結束
+        function endLevel() {
+            // 讓污染水層淡出，潔淨水層淡入
+            pollutedWaterLayer.style.opacity = 0;
+            cleanWaterLayer.style.opacity = 1;
+
+            // 移除所有污染源（因為已經在動畫中隱藏，這裡確保 DOM 清理）
+            const currentPollutionItems = gameArea.querySelectorAll('.pollution-item');
+            currentPollutionItems.forEach(item => item.remove());
+
+            gameOverlay.style.display = 'flex'; // 顯示結果畫面
+
+            overlayTitle.textContent = "Level Complete!";
+            overlayMessage.textContent = "The Earth thanks your efforts! The water is now clean!";
+            overlayIcon.src = "img/checkmark.png";
+            nextLevelButton.href = "level2.html";
+        }
+
+        // 頁面載入時初始化遊戲
+        window.onload = initGame;
+
+        // 當視窗大小改變時，重新佈局污染源（簡化處理，實際遊戲可能需要更複雜的重繪）
+        window.addEventListener('resize', initGame);
+
+    </script>
+    <audio id="gameMusic" loop>
+        <source src="img/12345.mp3" type="audio/mpeg">
+    </audio>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG Quest - Level 2: Clean Energy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* ==================================== */
+        /* 通用與基本樣式             */
+        /* ==================================== */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+            background-color: #A2E1EB; /* 較淺的天空藍，或 #87CEEB */
+            display: flex;
+            flex-direction: column; /* 垂直排列 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 確保像素字體在縮放時保持銳利 */
+        h1, h2, span, button, a {
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+        }
+
+        /* ==================================== */
+        /* 關卡畫面專屬的背景元素 (天空部分)       */
+        /* 這些元素會是身體背景的一部分，不會被遊戲區域遮蓋 */
+        /* ==================================== */
+        .sky-background-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%; /* 覆蓋整個body */
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden; /* 防止內容溢出 */
+            z-index: 1; /* 位於遊戲區塊之下 */
+        }
+
+        /* 遠景山脈 - 與 Level 1 共享樣式，顏色可調整 */
+        .mountain-layer {
+            position: absolute;
+            width: 100%;
+            height: 40%;
+            bottom: 0; /* 從底部開始 */
+            left: 0;
+            background-color: #6C5E7A; /* 深紫色/灰色，遠山色 */
+            z-index: 2; /* 比雲高 */
+            clip-path: polygon(0 100%, 0 70%, 10% 80%, 20% 65%, 30% 75%, 40% 60%, 50% 70%, 60% 55%, 70% 65%, 80% 50%, 90% 60%, 100% 45%, 100% 100%);
+            transform: translateY(20%); /* 確保顯示在底部 */
+        }
+        .mountain-layer.closer { /* 增加一層近一點的山 */
+            background-color: #558B2F; /* 深綠色，更近的山色 */
+            height: 30%;
+            bottom: 0;
+            z-index: 3;
+            clip-path: polygon(0 100%, 0 80%, 15% 70%, 30% 85%, 45% 70%, 60% 80%, 75% 65%, 90% 75%, 100% 60%, 100% 100%);
+            transform: translateY(10%);
+        }
+
+        /* 像素雲朵 - 與 Level 1 共享樣式 */
+        .pixel-cloud {
+            position: absolute;
+            width: 100px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            box-shadow: 5px 5px 0 rgba(200, 200, 200, 0.5); /* 像素陰影 */
+            animation: moveCloud 20s linear infinite;
+        }
+
+        .pixel-cloud:nth-child(1) { top: 5%; left: -10%; animation-delay: 0s; }
+        .pixel-cloud:nth-child(2) { top: 15%; left: -30%; animation-delay: 5s; width: 120px; height: 50px;}
+        .pixel-cloud:nth-child(3) { top: 10%; left: -50%; animation-delay: 10s; width: 80px; height: 30px;}
+        .pixel-cloud:nth-child(4) { top: 25%; left: -70%; animation-delay: 15s; width: 90px; height: 35px;}
+        .pixel-cloud:nth-child(5) { top: 20%; left: -90%; animation-delay: 20s; width: 110px; height: 45px;}
+
+        @keyframes moveCloud {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(120vw); }
+        }
+
+        /* ==================================== */
+        /* 遊戲介面頂部資訊             */
+        /* ==================================== */
+        .header-bar {
+            width: 90%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #33691E;
+            border: 4px solid #1B5E20;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 4px 4px 0 #000;
+            z-index: 20;
+        }
+
+        .header-bar img.sdg-icon {
+            width: 50px;
+            height: 50px;
+            image-rendering: pixelated;
+            margin-right: 15px;
+        }
+
+        .header-bar .level-info {
+            display: flex;
+            align-items: center;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .header-bar .level-title {
+            margin-left: 10px;
+            color: #fff;
+            image-rendering: pixelated;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .header-bar .score-info {
+            font-size: 1.2em;
+            text-shadow: 1px 1px 0 #000;
+            color: #FFEB3B;
+        }
+
+        /* ==================================== */
+        /* 遊戲區域             */
+        /* ==================================== */
+        .game-area {
+            width: 90%;
+            max-width: 800px;
+            height: 500px;
+            border: 8px solid #33691E;
+            box-shadow: 10px 10px 0 #1B5E20;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+            background-color: #616161; /* 基礎地表色，例如灰色 */
+        }
+
+        /* 污染/潔淨背景層 */
+        .game-area .energy-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            image-rendering: pixelated;
+            transition: opacity 1s ease-in-out;
+        }
+        .game-area .energy-layer.polluted {
+            background-image: url('img/energy_polluted_bg.png');
+        }
+        .game-area .energy-layer.clean {
+            background-image: url('img/energy_clean_bg.png');
+            opacity: 0; /* 預設不可見 */
+        }
+
+        /* 能源設施的樣式 */
+        .energy-item {
+            position: absolute;
+            width: 80px; /* 設施大小 */
+            height: 80px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            cursor: pointer;
+            transition: transform 0.1s ease-out, opacity 0.3s ease-out, background-image 0.5s ease-in-out; /* 點擊時的動畫 */
+            z-index: 15;
+            animation: float 3s ease-in-out infinite alternate; /* 輕微浮動 */
+        }
+
+        /* 浮動動畫，與 Level 1 相同 */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* 轉化特效 */
+        .energy-effect {
+            position: absolute;
+            width: 50px; /* 特效大小 */
+            height: 50px;
+            background-image: url('img/energy_effect.png'); /* 能源轉化特效 */
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            pointer-events: none;
+            animation: energyBurst 0.7s forwards; /* 新的特效動畫 */
+            z-index: 20;
+        }
+
+        @keyframes energyBurst {
+            0% { opacity: 1; transform: scale(0.5) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.5) rotate(180deg); } /* 放大並旋轉 */
+            100% { opacity: 0; transform: scale(0) rotate(360deg); } /* 縮小消失並繼續旋轉 */
+        }
+
+
+        /* ==================================== */
+        /* 遊戲結果畫面             */
+        /* ==================================== */
+        .game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            display: none;
+        }
+
+        .overlay-content {
+            background-color: #4CAF50;
+            padding: 30px 50px;
+            border: 8px solid #33691E;
+            box-shadow: 10px 10px 0 #1B5E20;
+            border-radius: 15px;
+            text-align: center;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        .overlay-content h3 {
+            font-size: 2.5em;
+            color: #FFEB3B;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #DAA520;
+        }
+
+        .overlay-content p {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.5);
+            letter-spacing: 0.03em;
+        }
+
+        .overlay-content img.icon {
+            width: 80px;
+            height: 80px;
+            image-rendering: pixelated;
+            margin-bottom: 20px;
+        }
+
+        .overlay-content .next-level-button {
+            background-color: #FF5722;
+            color: white;
+            padding: 15px 30px;
+            border: 4px solid #D32F2F;
+            cursor: pointer;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 5px 5px 0 #A13C00;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .overlay-content .next-level-button:hover {
+            background-color: #E64A19;
+            box-shadow: 3px 3px 0 #7D2700;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sky-background-elements">
+        <div class="mountain-layer"></div>
+        <div class="mountain-layer closer"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+        <div class="pixel-cloud"></div>
+    </div>
+
+
+    <div class="header-bar">
+        <div class="level-info">
+            <img src="img/sdg7_icon.png" alt="SDG 7 Clean Energy" class="sdg-icon">
+            <span class="level-title">Level 2: Clean Energy</span>
+        </div>
+        <div class="score-info">
+            <span id="score">Converted: 0</span> / <span id="max-score">0</span>
+        </div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+        <div class="energy-layer polluted"></div>
+        <div class="energy-layer clean"></div>
+        </div>
+
+    <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-content">
+            <img src="img/checkmark.png" alt="Level Complete" class="icon">
+            <h3 id="overlayTitle">Level Complete!</h3>
+            <p id="overlayMessage">Great job transforming the energy! The future is bright and clean!</p>
+            <a href="level3.html" class="next-level-button">Next Level</a>
+        </div>
+    </div>
+
+    <script>
+        const gameArea = document.getElementById('gameArea');
+        const pollutedEnergyLayer = gameArea.querySelector('.energy-layer.polluted');
+        const cleanEnergyLayer = gameArea.querySelector('.energy-layer.clean');
+        const scoreDisplay = document.getElementById('score');
+        const maxScoreDisplay = document.getElementById('max-score');
+        const gameOverlay = document.getElementById('gameOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const overlayMessage = document.getElementById('overlayMessage');
+        const overlayIcon = gameOverlay.querySelector('.icon');
+        const nextLevelButton = gameOverlay.querySelector('.next-level-button');
+
+        let score = 0;
+        const totalSourcesToTransform = 8; // 這關要轉化的能源設施總數
+
+        // 污染能源設施及其對應的潔淨能源設施圖片路徑
+        const energySources = [
+            { initial: 'img/coal_plant.png', transformed: 'img/solar_panel.png' },
+            { initial: 'img/oil_rig.png', transformed: 'img/wind_turbine.png' }
+        ];
+
+        // 初始化遊戲
+        function initGame() {
+            // 重置背景狀態
+            pollutedEnergyLayer.style.opacity = 1;
+            cleanEnergyLayer.style.opacity = 0;
+
+            // 清除所有動態生成的能源設施，重新開始
+            const currentEnergyItems = gameArea.querySelectorAll('.energy-item');
+            currentEnergyItems.forEach(el => el.remove());
+
+            score = 0;
+            scoreDisplay.textContent = `Converted: ${score}`;
+            maxScoreDisplay.textContent = totalSourcesToTransform;
+            gameOverlay.style.display = 'none'; // 隱藏結果畫面
+
+            // 隨機生成能源設施
+            for (let i = 0; i < totalSourcesToTransform; i++) {
+                createEnergyItem();
+            }
+        }
+
+        // 創建一個能源設施
+        function createEnergyItem() {
+            const energyItem = document.createElement('div');
+            energyItem.classList.add('energy-item');
+
+            // 隨機選擇一種污染能源設施及其對應的潔淨能源
+            const randomSourceType = energySources[Math.floor(Math.random() * energySources.length)];
+            energyItem.style.backgroundImage = `url('${randomSourceType.initial}')`;
+            energyItem.dataset.transformedSrc = randomSourceType.transformed; // 儲存轉化後的圖片路徑
+            energyItem.dataset.isTransformed = 'false'; // 追蹤是否已轉化
+
+            // 隨機位置 (考慮不要太靠近邊緣)
+            const itemSize = 80; // energy-item 的大小
+            const maxX = gameArea.offsetWidth - itemSize;
+            const maxY = gameArea.offsetHeight - itemSize;
+            energyItem.style.left = `${Math.random() * maxX}px`;
+            energyItem.style.top = `${Math.random() * maxY}px`;
+
+            energyItem.addEventListener('click', () => {
+                transformEnergy(energyItem);
+            });
+
+            gameArea.appendChild(energyItem);
+        }
+
+        // 轉化能源設施
+        function transformEnergy(item) {
+            if (item.dataset.isTransformed === 'true') return; // 防止重複點擊已轉化的設施
+
+            item.style.backgroundImage = `url('${item.dataset.transformedSrc}')`; // 改變圖片
+            item.dataset.isTransformed = 'true'; // 標記為已轉化
+            item.style.cursor = 'default'; // 改變游標，表示不可再點擊
+
+            score++;
+            scoreDisplay.textContent = `Converted: ${score}`;
+
+            // 添加轉化特效
+            const energyEffect = document.createElement('div');
+            energyEffect.classList.add('energy-effect');
+            energyEffect.style.left = `${item.offsetLeft + item.offsetWidth / 2 - energyEffect.offsetWidth / 2}px`;
+            energyEffect.style.top = `${item.offsetTop + item.offsetHeight / 2 - energyEffect.offsetHeight / 2}px`;
+            gameArea.appendChild(energyEffect);
+            setTimeout(() => {
+                energyEffect.remove(); // 移除特效元素
+            }, 700); // 配合動畫時間
+
+            // 當所有污染源都被轉化時，關卡完成
+            if (score >= totalSourcesToTransform) {
+                setTimeout(endLevel, 800); // 稍微延遲，讓最後一個特效顯示
+            }
+        }
+
+        // 關卡結束
+        function endLevel() {
+            // 讓污染背景淡出，潔淨背景淡入
+            pollutedEnergyLayer.style.opacity = 0;
+            cleanEnergyLayer.style.opacity = 1;
+
+            // 移除所有設施 (如果希望關卡完成後只看到背景，可執行此步驟)
+            const currentEnergyItems = gameArea.querySelectorAll('.energy-item');
+            currentEnergyItems.forEach(item => item.remove());
+
+            gameOverlay.style.display = 'flex'; // 顯示結果畫面
+
+            overlayTitle.textContent = "Level Complete!";
+            overlayMessage.textContent = "Great job transforming the energy! The future is bright and clean!";
+            overlayIcon.src = "img/checkmark.png";
+            nextLevelButton.href = "level3.html"; // 設定下一關的連結
+        }
+
+        // 頁面載入時初始化遊戲
+        window.onload = initGame;
+
+        // 當視窗大小改變時，重新佈局能源設施 (簡化處理)
+        window.addEventListener('resize', initGame);
+
+    </script>
+    <audio id="gameMusic" loop>
+        <source src="img/12345.mp3" type="audio/mpeg">
+    </audio>
+</body>
+</html>
