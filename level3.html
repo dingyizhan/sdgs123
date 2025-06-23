@@ -2,7 +2,7 @@
 <html lang="zh-Hant"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDG Quest - 關卡 3: 性別平等 (選擇題)</title>
+    <title>SDG Quest - 關卡 3: 永續消費與生產</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         /* ==================================== */
@@ -12,7 +12,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Press Start 2P', cursive;
-            background-color: #E91E63; /* SDG 5 的粉紅色調 */
+            background-color: #FFEB3B; /* SDG 12 的黃色調 */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -57,8 +57,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
-            background-color: #C2185B; /* 與SDG 5顏色接近 */
-            border: 4px solid #880E4F;
+            background-color: #FBC02D; /* 與SDG 12顏色接近 */
+            border: 4px solid #F9A825;
             border-radius: 10px;
             margin-bottom: 20px;
             box-shadow: 4px 4px 0 #000;
@@ -89,7 +89,7 @@
         .header-bar .score-info {
             font-size: 1.2em;
             text-shadow: 1px 1px 0 #000;
-            color: #FFEB3B;
+            color: #333; /* 分數顏色改為深色以在黃色背景上更清晰 */
         }
 
         /* ==================================== */
@@ -100,8 +100,8 @@
             max-width: 960px; /* 16:9 比例的合適寬度，例如 960px x 540px */
             aspect-ratio: 16 / 9; /* 設定為 16:9 比例 */
             background-color: rgba(255, 255, 255, 0.9);
-            border: 8px solid #880E4F; /* 與SDG 5邊框色 */
-            box-shadow: 10px 10px 0 #4A148C;
+            border: 8px solid #F9A825; /* 與SDG 12邊框色 */
+            box-shadow: 10px 10px 0 #F57F17;
             border-radius: 15px;
             position: relative;
             overflow: hidden;
@@ -152,40 +152,44 @@
         }
 
         .option-button {
-            background-color: #F06292;
-            color: white;
+            background-color: #FFD54F; /* 選項按鈕顏色 */
+            color: #333; /* 按鈕文字顏色 */
             padding: 15px 20px;
             margin-bottom: 15px;
-            border: 4px solid #E91E63;
+            border: 4px solid #FBC02D;
             cursor: pointer;
             font-family: 'Press Start 2P', cursive;
             font-size: 1em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            box-shadow: 4px 4px 0 #AD1457;
-            text-shadow: 1px 1px 0 #000;
+            box-shadow: 4px 4px 0 #F9A825;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
             transition: background-color 0.2s, box-shadow 0.2s;
             text-align: left;
-            word-break: break-word;
-            white-space: normal;
+            word-break: break-word; /* 處理長文字 */
+            white-space: normal; /* 讓文字自動換行 */
             line-height: 1.3;
         }
 
         .option-button:hover {
-            background-color: #F48FB1;
-            box-shadow: 2px 2px 0 #C2185B;
+            background-color: #FFECB3;
+            box-shadow: 2px 2px 0 #FBC02D;
         }
 
         .option-button.correct {
             background-color: #4CAF50;
             border-color: #388E3C;
             box-shadow: 4px 4px 0 #1B5E20;
+            color: #fff; /* 答對文字顏色改回白色 */
+            text-shadow: 1px 1px 0 #000;
         }
 
         .option-button.wrong {
             background-color: #F44336;
             border-color: #D32F2F;
             box-shadow: 4px 4px 0 #B71C1C;
+            color: #fff; /* 答錯文字顏色改回白色 */
+            text-shadow: 1px 1px 0 #000;
         }
 
         .feedback-icon {
@@ -223,14 +227,14 @@
             align-items: center;
             flex-direction: column;
             z-index: 100;
-            display: none;
+            display: none; /* 初始隱藏 */
         }
 
         .overlay-content {
-            background-color: #C2185B; /* 與SDG 5顏色接近 */
+            background-color: #FBC02D; /* 與SDG 12顏色接近 */
             padding: 30px 50px;
-            border: 8px solid #880E4F;
-            box-shadow: 10px 10px 0 #4A148C;
+            border: 8px solid #F9A825;
+            box-shadow: 10px 10px 0 #F57F17;
             border-radius: 15px;
             text-align: center;
             animation: bounceIn 0.8s ease-out;
@@ -240,16 +244,17 @@
 
         .overlay-content h3 {
             font-size: 2.5em;
-            color: #FFEB3B;
+            color: #333; /* 標題文字改為深色 */
             margin-bottom: 20px;
-            text-shadow: 3px 3px 0 #DAA520;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.2);
         }
 
         .overlay-content p {
             font-size: 1.5em;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
             letter-spacing: 0.03em;
+            color: #333; /* 段落文字改為深色 */
         }
 
         .overlay-content img.icon {
@@ -292,8 +297,8 @@
 
     <div class="header-bar">
         <div class="level-info">
-            <img src="img/sdg5_icon.png" alt="SDG 5 性別平等" class="sdg-icon">
-            <span class="level-title">關卡 3: 性別平等</span>
+            <img src="img/sdg12_icon.png" alt="SDG 12 永續消費與生產" class="sdg-icon">
+            <span class="level-title">關卡 3: 永續消費與生產</span>
         </div>
         <div class="score-info">
             <span id="score">答對: 0</span> / <span id="max-score">0</span>
@@ -312,7 +317,7 @@
         <div class="overlay-content">
             <img src="img/checkmark.png" alt="關卡完成" class="icon">
             <h3 id="overlayTitle">關卡完成！</h3>
-            <p id="overlayMessage">你對性別平等有深入理解！繼續為更公平的世界努力！</p>
+            <p id="overlayMessage">你對永續消費與生產有深入理解！繼續為減少環境足跡努力！</p>
             <a href="level4.html" class="next-level-button">下一關</a>
         </div>
     </div>
@@ -335,87 +340,88 @@
         const totalQuestionsRequired = 5; // 這關要答對的題目數量 (總共 5 題，全部答對才算通關)
         let currentQuestionIndex = 0; // 當前問題的索引
 
-        // 問答題資料 for SDG 5: 性別平等 (共 8 題，會隨機選 5 題)
+        // 問答題資料 for SDG 12: 永續消費與生產 (減少污染物) (共 8 題，會隨機選 5 題)
+        // 這些問題與 level2.html 中的問題不同，避免重複
         const questions = [
             {
-                question: "什麼是性別平等的核心概念？",
+                question: "以下哪項是再生能源的例子？",
                 options: [
-                    "A. 女性比男性優越",
-                    "B. 所有人，不分性別，都應享有相同權利和機會",
-                    "C. 男性應主導社會",
-                    "D. 只有特定性別才能擔任領導職務"
+                    "A. 煤炭",
+                    "B. 石油",
+                    "C. 太陽能和風力",
+                    "D. 天然氣"
                 ],
-                correctAnswer: "B. 所有人，不分性別，都應享有相同權利和機會"
+                correctAnswer: "C. 太陽能和風力"
             },
             {
-                question: "以下哪項是實現性別平等的重要挑戰？",
+                question: "「綠色消費」的核心意義是什麼？",
                 options: [
-                    "A. 鼓勵男性擔任所有職位",
-                    "B. 消除基於性別的暴力、歧視，促進女性政治經濟參與",
-                    "C. 增加女性家務負擔",
-                    "D. 限制女性接受教育的機會"
+                    "A. 購買昂貴的進口商品",
+                    "B. 選擇對環境影響最小、符合永續原則的產品和服務",
+                    "C. 大量購買新品",
+                    "D. 隨意丟棄包裝"
                 ],
-                correctAnswer: "B. 消除基於性別的暴力、歧視，促進女性政治經濟參與"
+                correctAnswer: "B. 選擇對環境影響最小、符合永續原則的產品和服務"
             },
             {
-                question: "為何賦予女性權力（Empowerment）對社會發展至關重要？",
+                question: "為何我們應該盡量減少食物浪費？",
                 options: [
-                    "A. 僅為增加女性在家庭中的地位",
-                    "B. 促進經濟增長，減少貧困，改善健康和教育水平",
-                    "C. 導致社會混亂",
-                    "D. 與社會發展無關"
+                    "A. 為了讓廚餘桶看起來更空",
+                    "B. 減少資源消耗、溫室氣體排放和垃圾處理負擔",
+                    "C. 讓更多食物被扔進垃圾桶",
+                    "D. 與環境保護無關"
                 ],
-                correctAnswer: "B. 促進經濟增長，減少貧困，改善健康和教育水平"
+                correctAnswer: "B. 減少資源消耗、溫室氣體排放和垃圾處理負擔"
             },
             {
-                question: "在教育領域，如何促進性別平等？",
+                question: "舊電池應該如何正確處理，以減少環境污染？",
                 options: [
-                    "A. 優先錄取男性學生",
-                    "B. 確保所有性別都能平等地接受優質教育，消除性別刻板印象",
-                    "C. 只提供STEM教育給男性",
-                    "D. 限制女性進入特定學科"
+                    "A. 隨意丟入一般垃圾桶",
+                    "B. 妥善分類回收，避免重金屬洩漏污染土壤和水源",
+                    "C. 直接焚燒",
+                    "D. 丟棄在戶外"
                 ],
-                correctAnswer: "B. 確保所有性別都能平等地接受優質教育，消除性別刻板印象"
+                correctAnswer: "B. 妥善分類回收，避免重金屬洩漏污染土壤和水源"
             },
             {
-                question: "家務勞動和育兒責任的公平分擔有什麼意義？",
+                question: "以下哪種日常行為有助於節約能源？",
                 options: [
-                    "A. 僅是家庭內部事務",
-                    "B. 促進性別平等，減輕女性負擔，使雙方能更好地參與社會和工作",
-                    "C. 導致家庭衝突",
-                    "D. 削弱男性權力"
+                    "A. 離開房間不關燈",
+                    "B. 隨手關閉不使用的電器，拔掉插頭，並選擇節能家電",
+                    "C. 開冷氣時不關窗戶",
+                    "D. 讓充電器一直插在插座上"
                 ],
-                correctAnswer: "B. 促進性別平等，減輕女性負擔，使雙方能更好地參與社會和工作"
+                correctAnswer: "B. 隨手關閉不使用的電器，拔掉插頭，並選擇節能家電"
             },
             {
-                question: "如何鼓勵女性參與政治和公共決策？",
+                question: "為了減少包裝廢棄物，我們可以採取哪種行動？",
                 options: [
-                    "A. 限制女性的投票權",
-                    "B. 設立配額制、提供培訓、消除參政障礙、提升意識",
-                    "C. 讓男性全權代表女性意見",
-                    "D. 認為女性對政治不感興趣"
+                    "A. 購買過度包裝的產品",
+                    "B. 自備購物袋、餐具和容器，選擇散裝或簡約包裝的商品",
+                    "C. 頻繁網購以增加包裝量",
+                    "D. 拒絕回收任何包裝"
                 ],
-                correctAnswer: "B. 設立配額制、提供培訓、消除參政障礙、提升意識"
+                correctAnswer: "B. 自備購物袋、餐具和容器，選擇散裝或簡約包裝的商品"
             },
             {
-                question: "在工作場所中，性別平等體現在哪些方面？",
+                question: "「永續時尚」（Sustainable Fashion）的特點是什麼？",
                 options: [
-                    "A. 同工不同酬",
-                    "B. 同工同酬、機會均等、反性騷擾政策、育兒支持",
-                    "C. 只提拔男性員工",
-                    "D. 不允許女性擔任管理職位"
+                    "A. 追求快速時尚和一次性穿著",
+                    "B. 注重產品的耐用性、使用環保材料、公平勞動條件和循環利用",
+                    "C. 鼓勵頻繁購買新衣",
+                    "D. 只關注設計不考慮生產過程"
                 ],
-                correctAnswer: "B. 同工同酬、機會均等、反性騷擾政策、育兒支持"
+                correctAnswer: "B. 注重產品的耐用性、使用環保材料、公平勞動條件和循環利用"
             },
             {
-                question: "SDG 5 的目標之一是消除對所有婦女和女孩的一切形式暴力。這包括什麼？",
+                question: "為何塑膠吸管對海洋環境造成較大影響？",
                 options: [
-                    "A. 僅指身體暴力",
-                    "B. 包括身體暴力、性暴力、心理暴力，以及童婚和割禮等有害習俗",
-                    "C. 僅指家庭暴力",
-                    "D. 不包括言語暴力"
+                    "A. 因為它們顏色鮮豔",
+                    "B. 因為它們難以分解，容易被海洋生物誤食或纏繞，造成傷害",
+                    "C. 因為它們很輕，容易漂浮",
+                    "D. 對環境沒有影響"
                 ],
-                correctAnswer: "B. 包括身體暴力、性暴力、心理暴力，以及童婚和割禮等有害習俗"
+                correctAnswer: "B. 因為它們難以分解，容易被海洋生物誤食或纏繞，造成傷害"
             }
         ];
 
@@ -562,7 +568,7 @@
             overlayContent.appendChild(title);
 
             const message = document.createElement('p');
-            message.textContent = '你對性別平等有深入理解！繼續為更公平的世界努力！';
+            message.textContent = '你對永續消費與生產有深入理解！繼續為減少環境足跡努力！';
             overlayContent.appendChild(message);
 
             // 添加下一關按鈕
